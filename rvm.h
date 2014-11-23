@@ -3,7 +3,7 @@
 typedef int trans_t;
 typedef struct rvm_infor
 {
-	std::unordered_map<std::string, void* >;
+	std::unordered_map<std::string, void* > map;
 	std::string directory;
 } rvm_t;
 extern rvm_t rvm_init(const char *directory);
