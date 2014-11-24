@@ -1,5 +1,6 @@
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 using namespace std;
 struct rvm_info
@@ -14,6 +15,9 @@ struct transaction_struct
     int numsegs;
     void** segbases;
     rvm_t rvm;
+    vector<void*>* modified_segs;
+    vector<int>* offset;
+    vector<int>* size;
 };
 typedef struct transaction_struct* trans_t;
 extern rvm_t rvm_init(const char *directory);
