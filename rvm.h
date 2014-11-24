@@ -2,10 +2,17 @@
 #include <string>
 
 using namespace std;
-typedef int trans_t;
+struct transaction_struct 
+{
+    int numsegs;
+    void** segbases;
+    rvm_t rvm;
+};
+typedef struct transaction_struct* trans_t;
 struct rvm_info
 {
 	unordered_map<string, void*>* map;
+    unordered_map<void*, int>* busy;
 	string directory;
 };
 typedef struct rvm_info* rvm_t;

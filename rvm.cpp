@@ -15,6 +15,7 @@ extern rvm_t rvm_init(const char *directory)
 	rvm_t rvm = (rvm_t) malloc(sizeof(struct rvm_info));
 	rvm->directory = directory;
     rvm->map = new unordered_map<string, void*>();
+    rvm->busy = new unordered_map<void*, int>();
 	mkdir(directory, 0755);
 	return rvm;
 }
@@ -103,20 +104,38 @@ extern void rvm_destroy(rvm_t rvm, const char *segname)
 }
 extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 {
-	
-
+    for (int i = 0; i < numsegs; i++)
+    {
+        if (rvm->busy->count(segbases + i) && (rvm->busy*)[segbases + i])
+        {
+            return (trans_t) -1;
+        }
+    }
+    for (int i = 0; i < numsegs; i++)
+    {
+        (*rvm->busy)[segbases + i] = 1;
+    }
+    trans_t trans = (trans_t)malloc(sizeof(struct transaction_struct));
+    trans->numsegs = numsegs;
+    trans->rvm = rvm;
+    trans->segbases = segbases;
 }
 extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size)
 {
 
 }
+
 extern void rvm_commit_trans(trans_t tid)
 {
 
 }
 extern void rvm_abort_trans(trans_t tid)
 {
-
+    for (int i = 0; i < tid->numsegs; tid++)
+    {
+        (*tid->rvm->busy)[tid->segbases + i] = 0;
+    }
+    free(tid);
 }
 extern void rvm_truncate_log(rvm_t rvm)
 {
