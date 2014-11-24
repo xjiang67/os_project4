@@ -4,7 +4,7 @@
 int main()
 {
     rvm_t rvm = rvm_init("bak");
-    std::cout << rvm.directory << std::endl;
+    std::cout << rvm->directory << std::endl;
     char* segs[1];
     segs[0] = (char *) rvm_map(rvm, "testseg", 10000);
     rvm_map(rvm, "testseg", 10000);

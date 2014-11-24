@@ -1,14 +1,17 @@
 #include <unordered_map>
 #include <string>
+
+using namespace std;
 typedef int trans_t;
-typedef struct rvm_infor
+struct rvm_info
 {
-	std::unordered_map<std::string, void* > map;
-	std::string directory;
-} rvm_t;
+	unordered_map<string, void*>* map;
+	string directory;
+};
+typedef struct rvm_info* rvm_t;
 extern rvm_t rvm_init(const char *directory);
-extern void *rvm_map(rvm_t &rvm, const char *segname, int size_to_create);
-extern void rvm_unmap(rvm_t &rvm, void *segbase);
+extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create);
+extern void rvm_unmap(rvm_t rvm, void *segbase);
 extern void rvm_destroy(rvm_t rvm, const char *segname);
 extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases);
 extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size);
