@@ -12,7 +12,7 @@ multi: rvm.a
 truncate: rvm.a
 	g++ truncate.c rvm.a -o truncate.o
 crash: rvm.a
-	g++ crash.c rvm.a -o crash.o
+	g++ crash.cpp rvm.a -o crash.o
 map-twice: rvm.a
 	g++ map-twice.cpp rvm.a -o map-twice.o
 map-test-case: rvm.a
