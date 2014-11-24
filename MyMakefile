@@ -1,0 +1,15 @@
+all: test basic abort multi-abort multi truncate
+test: rvm.a
+	g++ test.cpp rvm.a -o test.o
+basic: rvm.a
+	g++ basic.c rvm.a -o basic.o
+abort: rvm.a
+	g++ abort.c rvm.a -o abort.o
+multi-abort: rvm.a
+	g++ multi-abort.c rvm.a -o multi-abort.o
+multi: rvm.a
+	g++ multi.c rvm.a -o multi.o
+truncate: rvm.a
+	g++ truncate.c rvm.a -o truncate.o
+clean:
+	rm test.o basic.o abort.o multi-abort.o multi.o truncate.o
