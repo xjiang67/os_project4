@@ -1,1 +1,1 @@
-g++ -o a basic.c rvm.cpp
+g++ -o a truncate.c rvm.cpp

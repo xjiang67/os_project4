@@ -46,7 +46,8 @@ extern void rvm_truncate_log(rvm_t rvm)
     }
     log.close();
     string dir = rvm->directory + "/log";
-    remove(dir.c_str());
+    ofstream log_out(dir);
+    log_out.close();
 }
 
 extern rvm_t rvm_init(const char *directory)
@@ -58,6 +59,20 @@ extern rvm_t rvm_init(const char *directory)
 	mkdir(directory, 0755);
 	return rvm;
 }
+
+void readFromFile(char* buf, string fileName)
+{
+    cout << "readFromFile" << endl;
+    ifstream bak(fileName);
+    bak.seekg(0, bak.end);
+    int size = bak.tellg();
+    cout << "!!!!!!" << fileName << endl;
+    bak.seekg(0, bak.beg);
+    bak.read(buf, size);
+    cout << buf << endl;
+    bak.close();
+}
+
 extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
 {
 	// cout<<"map size: "<<rvm->map->size()<<endl;
@@ -103,6 +118,11 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
     			truncate(path, size_to_create);
     		}
             rvm_truncate_log(rvm);
+            char* seg_mem = (char*)malloc(size_to_create * sizeof(char));
+            (*(rvm->map))[segname] = seg_mem;
+            string fileDir = rvm->directory + "/" + segname;
+            readFromFile(seg_mem, fileDir);
+            return (void*)seg_mem;
 		}else{
 			// try to map the same segment twice, error
 			cout<<"Error, trying to map the same segment twice!"<< endl;
@@ -112,10 +132,10 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
     	// new a file and malloc a memory
 		ofstream outfile(path);
 		outfile.seekp(size_to_create - 1);
+        void* seg_mem = malloc(size_to_create * sizeof(char));
+        (*(rvm->map))[segname] = seg_mem;
+        return seg_mem;
 	}
-	void* seg_mem = malloc(size_to_create * sizeof(char));
-	(*(rvm->map))[segname] = seg_mem;
-    return seg_mem;	
 }
 extern void rvm_unmap(rvm_t rvm, void *segbase)
 {
@@ -176,6 +196,7 @@ extern void rvm_destroy(rvm_t rvm, const char *segname)
 }
 extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 {
+    cout << "begin trans" << endl;
     for (int i = 0; i < numsegs; i++)
     {
         if (rvm->busy->count(segbases + i) && (*(rvm->busy))[segbases + i])
@@ -183,6 +204,7 @@ extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
             return (trans_t) -1;
         }
     }
+    cout << "through" << endl;
     for (int i = 0; i < numsegs; i++)
     {
         (*(rvm->busy))[segbases + i] = 1;
@@ -199,7 +221,7 @@ extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 
 extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size)
 {
-    cout << "about to modify" << endl;
+    cout << "about to modify" << tid->numsegs << endl;
     rvm_t rvm = tid->rvm;
     int confirm = 0;
     for (int i = 0; i < tid->numsegs; i++)
@@ -210,6 +232,7 @@ extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size
         }
     }
     if (!confirm) return;
+    cout << "confirmed" << endl;
     tid->modified_segs->push_back(segbase);
     tid->size->push_back(size);
     tid->offset->push_back(offset);
@@ -217,6 +240,10 @@ extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size
 
 void release_trans(trans_t tid)
 {
+    for (int i = 0; i < tid->numsegs; i++)
+    {
+        (*(tid->rvm->busy))[tid->segbases + i] = 0;
+    }
     delete(tid->modified_segs);
     delete(tid->offset);
     delete(tid->size);
@@ -249,12 +276,27 @@ extern void rvm_commit_trans(trans_t tid)
     }
     log.close();
     release_trans(tid);
+
+    cout << "end log" << endl;
 }
 extern void rvm_abort_trans(trans_t tid)
 {
-    for (int i = 0; i < tid->numsegs; tid++)
+    cout << "abort" << endl;
+    rvm_t rvm = tid->rvm;
+    rvm_truncate_log(rvm);
+    int n = tid->modified_segs->size();
+    for (int i = 0; i < n; i++)
     {
-        (*(tid->rvm->busy))[tid->segbases + i] = 0;
+        string name;
+        for (auto it = rvm->map->begin();it != rvm->map->end(); ++it)
+        {
+            if (it->second == (*(tid->modified_segs))[i])
+            {
+                name = it->first;
+                break;
+            }
+        }
+        readFromFile((char*)(*(tid->modified_segs))[i], rvm->directory + "/" + name);
     }
     release_trans(tid);
 }
