@@ -1,1 +1,1 @@
-g++ -o a truncate.c rvm.cpp
+g++ -o a crash.c rvm.cpp
