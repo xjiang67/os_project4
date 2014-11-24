@@ -46,7 +46,8 @@ extern void rvm_truncate_log(rvm_t rvm)
     }
     log.close();
     string dir = rvm->directory + "/log";
-    remove(dir.c_str());
+    ofstream log_out(dir);
+    log_out.close();
 }
 
 extern rvm_t rvm_init(const char *directory)
