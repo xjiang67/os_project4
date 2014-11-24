@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <unistd.h> 
 #include <cstring>
+#include <stdio.h>
 using namespace std;
 extern rvm_t rvm_init(const char *directory)
 {
@@ -43,12 +44,10 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
     }
 
     closedir(dir);
-    // cout<<"isExit:" <<isExit<<endl;
     char* path = new char[strlen(directory)];
     strcpy (path,directory);
     strcat (path,"/");
     strcat (path,segname);
-    // cout<<"path:"<<path<<endl;
 	if(isExit)
     {
 		// if file in disk
@@ -100,7 +99,37 @@ extern void rvm_unmap(rvm_t rvm, void *segbase)
 extern void rvm_destroy(rvm_t rvm, const char *segname)
 {
     // Remember to release map as well!
-
+    const char* directory = rvm->directory.c_str();
+    DIR *dir = opendir(directory);
+    bool isExit = false;
+    if(dir) 
+    { 
+        struct dirent *ent; 
+        while((ent = readdir(dir)) != NULL) 
+        { 
+            if(strcmp(ent->d_name, segname) == 0)
+            {
+                cout<<"Find file!"<<endl;
+                isExit = true;
+                break;
+            }
+        } 
+    }else{ 
+        cout << "Error opening directory" << endl;
+        return; 
+    }
+    closedir(dir);
+    if(isExit){
+        char* path = new char[strlen(directory)];
+        strcpy (path,directory);
+        strcat (path,"/");
+        strcat (path,segname);
+        if(remove(path)!=0){
+            cout<<"Deleting file error!"<<endl;
+        }else{
+            cout<<"Deleting file successful!"<<endl;
+        }
+    }
 }
 extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 {

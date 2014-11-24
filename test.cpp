@@ -11,5 +11,6 @@ int main()
     rvm_unmap(rvm, segs[0]);
     segs[0] = (char *) rvm_map(rvm, "testseg", 10000);
     rvm_unmap(rvm, segs[0]);
+    rvm_destroy(rvm,"testseg");
     return 0;
 }
