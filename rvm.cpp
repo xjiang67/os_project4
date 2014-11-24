@@ -106,7 +106,7 @@ extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 {
     for (int i = 0; i < numsegs; i++)
     {
-        if (rvm->busy->count(segbases + i) && (rvm->busy*)[segbases + i])
+        if (rvm->busy->count(segbases + i) && (*rvm->busy)[segbases + i])
         {
             return (trans_t) -1;
         }
