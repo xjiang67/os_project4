@@ -60,7 +60,7 @@ extern rvm_t rvm_init(const char *directory)
 }
 extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
 {
-	cout<<"map size: "<<rvm->map->size()<<endl;
+	// cout<<"map size: "<<rvm->map->size()<<endl;
 	const char* directory = rvm->directory.c_str();
 	DIR *dir = opendir(directory);
 	bool isExit = false;
@@ -71,7 +71,7 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
         { 
             if(strcmp(ent->d_name, segname) == 0)
             {
-            	cout<<"Find file!"<<endl;
+            	// cout<<"Find file!"<<endl;
             	isExit = true;
             	break;
             }
@@ -139,7 +139,11 @@ extern void rvm_unmap(rvm_t rvm, void *segbase)
 }
 extern void rvm_destroy(rvm_t rvm, const char *segname)
 {
-    // Remember to release map as well!
+    // check if the segment is mapped or not
+    if(rvm->map->find(segname)!=rvm->map->end()){
+        cout<<"Error: trying to destory before unmapping!"<<endl;
+        return;
+    }
     const char* directory = rvm->directory.c_str();
     DIR *dir = opendir(directory);
     bool isExit = false;
