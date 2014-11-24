@@ -48,6 +48,7 @@ void proc2()
      segs[0] = (char *) rvm_map(rvm, "testseg", 10000);
      if(strcmp(segs[0], TEST_STRING)) {
 	  printf("ERROR: first hello not present\n");
+      printf("%s", segs[0]);
 	  exit(2);
      }
      if(strcmp(segs[0]+OFFSET2, TEST_STRING)) {
