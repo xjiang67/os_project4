@@ -102,6 +102,13 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
     			truncate(path, size_to_create);
     		}
             rvm_truncate_log(rvm);
+            char* seg_mem = (char*)malloc(size_to_create * sizeof(char));
+            (*(rvm->map))[segname] = seg_mem;
+            string fileDir = rvm->directory + "/" + segname;
+            ifstream bak(fileDir);
+            bak.read(seg_mem, size_to_create);
+            bak.close();
+            return (void*)seg_mem;
 		}else{
 			// try to map the same segment twice, error
 			cout<<"Error, trying to map the same segment twice!"<< endl;
@@ -111,10 +118,10 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
     	// new a file and malloc a memory
 		ofstream outfile(path);
 		outfile.seekp(size_to_create - 1);
+        void* seg_mem = malloc(size_to_create * sizeof(char));
+        (*(rvm->map))[segname] = seg_mem;
+        return seg_mem;
 	}
-	void* seg_mem = malloc(size_to_create * sizeof(char));
-	(*(rvm->map))[segname] = seg_mem;
-    return seg_mem;	
 }
 extern void rvm_unmap(rvm_t rvm, void *segbase)
 {
