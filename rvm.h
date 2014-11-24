@@ -8,7 +8,7 @@ typedef struct rvm_infor
 } rvm_t;
 extern rvm_t rvm_init(const char *directory);
 extern void *rvm_map(rvm_t &rvm, const char *segname, int size_to_create);
-extern void rvm_unmap(rvm_t rvm, void *segbase);
+extern void rvm_unmap(rvm_t &rvm, void *segbase);
 extern void rvm_destroy(rvm_t rvm, const char *segname);
 extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases);
 extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size);

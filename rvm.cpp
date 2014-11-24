@@ -18,7 +18,7 @@ extern rvm_t rvm_init(const char *directory){
 	return *rvm;
 }
 extern void *rvm_map(rvm_t &rvm, const char *segname, int size_to_create){
-	cout<<"map size: "<<rvm.map.count(segname)<<endl;
+	cout<<"map size: "<<rvm.map.size()<<endl;
 	const char* directory = rvm.directory.c_str();
 	DIR *dir = opendir(directory);
 	bool isExit = false;
@@ -70,8 +70,18 @@ extern void *rvm_map(rvm_t &rvm, const char *segname, int size_to_create){
 	rvm.map[segname] = seg_mem;
     return seg_mem;	
 }
-extern void rvm_unmap(rvm_t rvm, void *segbase){
-
+extern void rvm_unmap(rvm_t &rvm, void *segbase){
+    for ( auto it = rvm.map.begin(); it != rvm.map.end(); ++it )
+    {
+        if (it->second == segbase)
+        {
+            rvm.map.erase(it);
+            cout << rvm.map.size() << endl;
+            cout << "erase!" << endl;
+            break;
+        }
+    }
+    free(segbase);
 }
 extern void rvm_destroy(rvm_t rvm, const char *segname){
 
