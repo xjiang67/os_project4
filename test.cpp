@@ -3,6 +3,7 @@
 #include<iostream>
 int main()
 {
+    rvm_verbose(0);
     rvm_t rvm = rvm_init("bak");
     std::cout << rvm->directory << std::endl;
     char* segs[1];
@@ -10,6 +11,7 @@ int main()
     rvm_map(rvm, "testseg", 10000);
     rvm_unmap(rvm, segs[0]);
     segs[0] = (char *) rvm_map(rvm, "testseg", 10000);
+    rvm_verbose(1);
     rvm_unmap(rvm, segs[0]);
     rvm_destroy(rvm,"testseg");
     return 0;

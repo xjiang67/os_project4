@@ -14,7 +14,8 @@ using namespace std;
 
 extern void rvm_truncate_log(rvm_t rvm)
 {
-    cout << endl << "truncate" << endl;
+    if(verbose_enabled!=0)
+        cout << endl << "truncate" << endl;
     char* buf;
     ifstream log(rvm->directory + "/log");
     if (!log.is_open()) return;
@@ -52,6 +53,8 @@ extern void rvm_truncate_log(rvm_t rvm)
 
 extern rvm_t rvm_init(const char *directory)
 {
+    if(verbose_enabled!=0)
+        cout << endl << "rvm init" << endl;
 	rvm_t rvm = (rvm_t) malloc(sizeof(struct rvm_info));
 	rvm->directory = directory;
     rvm->map = new unordered_map<string, void*>();
@@ -76,6 +79,8 @@ void readFromFile(char* buf, string fileName)
 extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
 {
 	// cout<<"map size: "<<rvm->map->size()<<endl;
+    if(verbose_enabled!=0)
+        cout << endl << "rvm mapping" << endl;
 	const char* directory = rvm->directory.c_str();
 	DIR *dir = opendir(directory);
 	bool isExit = false;
@@ -139,6 +144,8 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
 }
 extern void rvm_unmap(rvm_t rvm, void *segbase)
 {
+    if(verbose_enabled!=0)
+        cout << endl << "rvm unmapping" << endl;
     int erased = 0;
     for (auto it = rvm->map->begin();it != rvm->map->end(); ++it)
     {
@@ -160,6 +167,8 @@ extern void rvm_unmap(rvm_t rvm, void *segbase)
 extern void rvm_destroy(rvm_t rvm, const char *segname)
 {
     // check if the segment is mapped or not
+    if(verbose_enabled!=0)
+        cout << endl << "rvm destory" << endl;
     if(rvm->map->find(segname)!=rvm->map->end()){
         cout<<"Error: trying to destory before unmapping!"<<endl;
         return;
@@ -196,7 +205,8 @@ extern void rvm_destroy(rvm_t rvm, const char *segname)
 }
 extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 {
-    cout << "begin trans" << endl;
+    if(verbose_enabled!=0)
+        cout << endl << "begin transaction" << endl;
     for (int i = 0; i < numsegs; i++)
     {
         if (rvm->busy->count(segbases + i) && (*(rvm->busy))[segbases + i])
@@ -221,7 +231,8 @@ extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
 
 extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size)
 {
-    cout << "about to modify" << tid->numsegs << endl;
+    if(verbose_enabled!=0)
+        cout <<endl<< "about to modify" << tid->numsegs << endl;
     rvm_t rvm = tid->rvm;
     int confirm = 0;
     for (int i = 0; i < tid->numsegs; i++)
@@ -240,6 +251,8 @@ extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size
 
 void release_trans(trans_t tid)
 {
+    if(verbose_enabled!=0)
+        cout << endl << "releasing transaction" << endl;
     for (int i = 0; i < tid->numsegs; i++)
     {
         (*(tid->rvm->busy))[tid->segbases + i] = 0;
@@ -252,6 +265,8 @@ void release_trans(trans_t tid)
 
 extern void rvm_commit_trans(trans_t tid)
 {
+    if(verbose_enabled!=0)
+        cout << endl << "rvm commit transaction" << endl;
     rvm_t rvm = tid->rvm;
     ofstream log;
     log.open(rvm->directory + "/log");
@@ -281,7 +296,8 @@ extern void rvm_commit_trans(trans_t tid)
 }
 extern void rvm_abort_trans(trans_t tid)
 {
-    cout << "abort" << endl;
+    if(verbose_enabled!=0)
+        cout << endl << "abort transaction" << endl;
     rvm_t rvm = tid->rvm;
     rvm_truncate_log(rvm);
     int n = tid->modified_segs->size();
@@ -302,5 +318,5 @@ extern void rvm_abort_trans(trans_t tid)
 }
 extern void rvm_verbose(int enable_flag)
 {
-
+    verbose_enabled = enable_flag;
 }
