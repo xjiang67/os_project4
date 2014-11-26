@@ -26,23 +26,23 @@ extern void rvm_truncate_log(rvm_t rvm)
         count++;
         log >> name;
         if (log.eof()) break;
-        cout << "name: " << name << endl;
+        // cout << "name: " << name << endl;
         int size = 0;
         int offset = 0;
         log >> offset;
         log >> size;
-        cout << offset << " " << size << endl;
+        // cout << offset << " " << size << endl;
         buf = (char*) malloc(size * sizeof(char));
         log.ignore(1, EOF);
         log.read(buf, size);
         log.ignore(size * 10, '\n');
         ofstream bak(rvm->directory + "/" + name, ios::in |ios::out);
-        cout << "offset : " << offset << endl; 
+        // cout << "offset : " << offset << endl; 
         bak.seekp(offset);
-        cout << "p : " << bak.tellp() << endl;
+        // cout << "p : " << bak.tellp() << endl;
         bak.write(buf, size);
         bak.close();
-        cout << buf << endl;
+        // cout << buf << endl;
         free(buf);
     }
     log.close();
@@ -65,20 +65,16 @@ extern rvm_t rvm_init(const char *directory)
 
 void readFromFile(char* buf, string fileName)
 {
-    cout << "readFromFile" << endl;
     ifstream bak(fileName);
     bak.seekg(0, bak.end);
     int size = bak.tellg();
-    cout << "!!!!!!" << fileName << endl;
     bak.seekg(0, bak.beg);
     bak.read(buf, size);
-    cout << buf << endl;
     bak.close();
 }
 
 extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
 {
-	// cout<<"map size: "<<rvm->map->size()<<endl;
     if(verbose_enabled!=0)
         cout << endl << "rvm mapping" << endl;
 	const char* directory = rvm->directory.c_str();
@@ -115,7 +111,6 @@ extern void *rvm_map(rvm_t rvm, const char *segname, int size_to_create)
         {
 			// if not mapped
 			// extend the file size
-			cout<<"map not exits"<<endl;
 			ifstream in(path, ifstream::ate | ifstream::binary);
     		int file_length = in.tellg();
     		if(size_to_create>file_length)
@@ -183,7 +178,6 @@ extern void rvm_destroy(rvm_t rvm, const char *segname)
         { 
             if(strcmp(ent->d_name, segname) == 0)
             {
-                cout<<"Find file!"<<endl;
                 isExit = true;
                 break;
             }
@@ -214,7 +208,6 @@ extern trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases)
             return (trans_t) -1;
         }
     }
-    cout << "through" << endl;
     for (int i = 0; i < numsegs; i++)
     {
         (*(rvm->busy))[segbases + i] = 1;
@@ -243,7 +236,6 @@ extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size
         }
     }
     if (!confirm) return;
-    cout << "confirmed" << endl;
     tid->modified_segs->push_back(segbase);
     tid->size->push_back(size);
     tid->offset->push_back(offset);
@@ -251,8 +243,6 @@ extern void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size
 
 void release_trans(trans_t tid)
 {
-    if(verbose_enabled!=0)
-        cout << endl << "releasing transaction" << endl;
     for (int i = 0; i < tid->numsegs; i++)
     {
         (*(tid->rvm->busy))[tid->segbases + i] = 0;
@@ -271,7 +261,6 @@ extern void rvm_commit_trans(trans_t tid)
     ofstream log;
     log.open(rvm->directory + "/log");
     int n = tid->modified_segs->size();
-    cout << "logging " << endl;
 
     for (int i = 0; i < n; i++)
     {
@@ -292,7 +281,6 @@ extern void rvm_commit_trans(trans_t tid)
     log.close();
     release_trans(tid);
 
-    cout << "end log" << endl;
 }
 extern void rvm_abort_trans(trans_t tid)
 {

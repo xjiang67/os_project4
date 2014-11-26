@@ -1,1 +1,1 @@
-g++ -o a crash.c rvm.cpp
+g++ -o a test.cpp rvm.cpp
